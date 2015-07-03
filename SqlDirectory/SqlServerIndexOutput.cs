@@ -28,13 +28,6 @@ namespace SqlDirectory
 
         private ByteWriter _buffer = new ByteWriter(4082);
 
-        //class PendingWrite
-        //{
-        //    public byte[] Buffer { get; set; }
-        //    public int Length { get; set; }
-        //    public long Position { get; set; }
-        //}
-
         public override void WriteBytes(byte[] b, int offset, int length)
         {
             var segment = new byte[length];

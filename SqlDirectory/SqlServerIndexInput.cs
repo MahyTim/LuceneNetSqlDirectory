@@ -11,11 +11,14 @@ namespace SqlDirectory
         private readonly Options _options;
         private long _position;
 
+        private SqlServerStreamingReader _dataReader;
+
         internal SqlServerIndexInput(SqlConnection connection, string name, Options options)
         {
             _connection = connection;
             _name = name;
             _options = options;
+            _dataReader = new SqlServerStreamingReader(connection, name, options.SchemaName);
         }
 
         public override byte ReadByte()
@@ -30,7 +33,7 @@ namespace SqlDirectory
             if (b.Length == 0)
                 return;
 
-            _connection.ReadBytes(_name, _position, b, offset, len, _options.SchemaName);
+            _dataReader.ReadBytes(_position, b, offset, len);
 
             _position += len;
         }
