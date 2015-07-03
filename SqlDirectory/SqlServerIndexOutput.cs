@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Linq;
 using Dapper;
 using Lucene.Net.Store;
 
@@ -24,36 +26,45 @@ namespace SqlDirectory
             WriteBytes(new[] { b }, 0, 1);
         }
 
-        private bool? _isFirst = true;
+        private List<PendingWrite> _pendingWrites = new List<PendingWrite>();
 
+        class PendingWrite
+        {
+            public byte[] Buffer { get; set; }
+            public int Length { get; set; }
+            public long Position { get; set; }
+        }
 
         public override void WriteBytes(byte[] b, int offset, int length)
         {
-            if (_isFirst == null)
+            var segment = new byte[length];
+            Buffer.BlockCopy(b, offset, segment, 0, length);
+            _pendingWrites.Add(new PendingWrite()
             {
-                _isFirst = Length == 0;
-            }
-            if (length == 1)
-            {
-                _connection.Write(new[] { b[0] }, (int)_pointer, 1, _name, _isFirst.Value, _options.SchemaName);
-                _isFirst = false;
-            }
-            else if (length > 1)
-            {
-                var segment = new byte[length];
-                Buffer.BlockCopy(b, offset, segment, 0, length);
-                _connection.Write(segment, (int)_pointer, length, _name, _isFirst.Value, _options.SchemaName);
-                _isFirst = false;
-            }
+                Buffer = segment,
+                Length = length,
+                Position = _pointer
+            });
             _pointer += length;
         }
 
         public override void Flush()
         {
+            if (_pendingWrites.Any())
+            {
+                var isFirst = Length == 0;
+                foreach (var pendingWrite in _pendingWrites)
+                {
+                    _connection.Write(pendingWrite.Buffer, (int)pendingWrite.Position, pendingWrite.Length, _name, isFirst, _options.SchemaName);
+                    isFirst = false;
+                }
+                _pendingWrites.Clear();
+            }
         }
 
         protected override void Dispose(bool disposing)
         {
+            Flush();
         }
 
         public override void Seek(long pos)

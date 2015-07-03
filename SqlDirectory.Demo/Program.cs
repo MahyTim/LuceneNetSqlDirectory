@@ -56,7 +56,7 @@ namespace SqlDirectory.Demo
             }
 
             Console.Write("Flushing and disposing writer...");
-            indexWriter.Flush(false, false, false);
+            indexWriter.Flush(true, true, true);
             indexWriter.Dispose();
 
             Console.WriteLine("Total docs is {0}", indexWriter.NumDocs());

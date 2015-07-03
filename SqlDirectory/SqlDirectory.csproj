@@ -60,6 +60,7 @@
   <ItemGroup>
     <Compile Include="Database.cs" />
     <Compile Include="Helpers\BlobHelper.cs" />
+    <Compile Include="Helpers\ByteHelper.cs" />
     <Compile Include="Helpers\HigherOrderFunctions.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
