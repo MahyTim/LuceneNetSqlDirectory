@@ -10,7 +10,7 @@ namespace SqlDirectory
         {
             if (b.Length == 0)
                 return;
-            using (var command = new SqlCommand($"SELECT SubString(Content,{position + 1},{len}) FROM {schemaName}.[FileContents] WHERE Name = @name", connection))
+            using (var command = new SqlCommand($"SELECT Content FROM {schemaName}.[FileContents] WHERE Name = @name", connection))
             {
                 command.Parameters.AddWithValue("name", name);
                 using (var reader = command.ExecuteReader(CommandBehavior.SequentialAccess))
@@ -20,9 +20,7 @@ namespace SqlDirectory
                         reader.Read();
                         if (false == reader.IsDBNull(0))
                         {
-                            var bytes = reader.GetSqlBinary(0).Value;
-                            if (bytes.Length > 0)
-                                Buffer.BlockCopy(bytes, 0, b, offset, len);
+                            reader.GetBytes(0, position, b, offset, len);
                         }
                     }
                 }
