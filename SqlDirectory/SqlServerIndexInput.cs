@@ -7,7 +7,6 @@ namespace SqlDirectory
     internal class SqlServerIndexInput : IndexInput
     {
         private readonly SqlConnection _connection;
-        private readonly ReInitializableLazy<Disposer<SqlDataReader>> _reader;
         private readonly string _name;
         private readonly Options _options;
         private long _position;
@@ -15,14 +14,6 @@ namespace SqlDirectory
         internal SqlServerIndexInput(SqlConnection connection, string name, Options options)
         {
             _connection = connection;
-            _reader = new ReInitializableLazy<Disposer<SqlDataReader>>(() =>
-            {
-                var command = new SqlCommand($"SELECT Content FROM {_options.SchemaName}.FileContents WHERE Name = @name", connection);
-                command.Parameters.AddWithValue("name", name);
-                var reader = command.ExecuteReader();
-                reader.Read();
-                return new Disposer<SqlDataReader>(reader, command);
-            });
             _name = name;
             _options = options;
         }
@@ -39,32 +30,17 @@ namespace SqlDirectory
             if (b.Length == 0)
                 return;
 
-            if (_reader.Result.Data.IsClosed)
-            {
-                _reader.ReInitialize();
-            }
-            if (_reader.Result.Data.HasRows)
-            {
-                if (false == _reader.Result.Data.IsDBNull(0))
-                {
-                    _reader.Result.Data.GetBytes(0, _position, b, offset, len);
-                }
-            }
+            _connection.ReadBytes(_name, _position, b, offset, len, _options.SchemaName);
+
             _position += len;
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
-                _reader.Dispose();
         }
 
         public override void Seek(long pos)
         {
-            if (pos <= _position)
-            {
-                _reader.ReInitialize();
-            }
             _position = pos;
         }
 

@@ -60,11 +60,9 @@
   <ItemGroup>
     <Compile Include="Database.cs" />
     <Compile Include="Helpers\BlobHelper.cs" />
-    <Compile Include="Helpers\Disposer.cs" />
     <Compile Include="Helpers\HigherOrderFunctions.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Helpers\ReInitializableLazy.cs" />
     <Compile Include="Helpers\SqlConnectionHelper.cs" />
     <Compile Include="SqlServerDirectory.cs" />
     <Compile Include="SqlServerIndexInput.cs" />

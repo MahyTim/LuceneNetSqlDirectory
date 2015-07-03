@@ -65,9 +65,6 @@ namespace SqlDirectory.Demo
             Console.WriteLine("Hit Key to search again");
             Console.ReadKey();
 
-
-
-
             IndexSearcher searcher;
 
             using (new AutoStopWatch("Creating searcher"))
