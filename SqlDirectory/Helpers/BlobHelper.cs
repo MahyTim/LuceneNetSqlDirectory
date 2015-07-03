@@ -5,11 +5,11 @@ namespace SqlDirectory
 {
     static class BlobHelper
     {
-        public static void ReadBytes(this SqlConnection connection, string name, long position, byte[] b, int offset, int len,string schemaName)
+        public static void ReadBytes(this SqlConnection connection, string name, long position, byte[] b, int offset, int len, string schemaName)
         {
             if (b.Length == 0)
                 return;
-            using (var command = new SqlCommand($"SELECT Content FROM {schemaName}.[FileContents] WHERE Name = @name", connection))
+            using (var command = new SqlCommand($"SELECT SubString(Content,{position},{len}) FROM {schemaName}.[FileContents] WHERE Name = @name", connection))
             {
                 command.Parameters.AddWithValue("name", name);
                 using (var reader = command.ExecuteReader(CommandBehavior.SequentialAccess))
@@ -19,7 +19,7 @@ namespace SqlDirectory
                         reader.Read();
                         if (false == reader.IsDBNull(0))
                         {
-                            reader.GetBytes(0, position, b, offset, len);
+                            reader.GetBytes(0, 0, b, offset, len);
                         }
                     }
                 }

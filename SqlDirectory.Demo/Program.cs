@@ -77,15 +77,18 @@ namespace SqlDirectory.Demo
             using (new AutoStopWatch("Count"))
                 Console.WriteLine("Number of docs: {0}", searcher.IndexReader.NumDocs());
 
-            SearchForPhrase(searcher, "dog");
-            Console.WriteLine("Hit a key to dispose and exit");
-            Console.ReadKey();
+            while (true)
+            {
+                SearchForPhrase(searcher, "dog");
+                Console.WriteLine("Press a key to search again");
+                Console.ReadKey();
+            }
         }
 
 
         static void SearchForPhrase(IndexSearcher searcher, string phrase)
         {
-            using (new AutoStopWatch(string.Format("Search for {0}", phrase)))
+            using (new AutoStopWatch($"Search for {phrase}"))
             {
                 Lucene.Net.QueryParsers.QueryParser parser = new Lucene.Net.QueryParsers.QueryParser(Lucene.Net.Util.Version.LUCENE_30, "Body", new StandardAnalyzer(Lucene.Net.Util.Version.LUCENE_30));
                 Lucene.Net.Search.Query query = parser.Parse(phrase);
@@ -95,8 +98,8 @@ namespace SqlDirectory.Demo
             }
         }
 
-        static Random _random = new Random((int)DateTime.Now.Ticks);
-        static string[] sampleTerms =
+        static readonly Random Random = new Random((int)DateTime.Now.Ticks);
+        static readonly string[] SampleTerms =
             {
                 "dog","cat","car","horse","door","tree","chair","microsoft","apple","adobe","google","golf","linux","windows","firefox","mouse","hornet","monkey","giraffe","computer","monitor",
                 "steve","fred","lili","albert","tom","shane","gerald","chris",
@@ -106,10 +109,10 @@ namespace SqlDirectory.Demo
         private static string GeneratePhrase(int MaxTerms)
         {
             StringBuilder phrase = new StringBuilder();
-            int nWords = 2 + _random.Next(MaxTerms);
+            int nWords = 2 + Random.Next(MaxTerms);
             for (int i = 0; i < nWords; i++)
             {
-                phrase.AppendFormat(" {0} {1}", sampleTerms[_random.Next(sampleTerms.Length)], _random.Next(32768).ToString());
+                phrase.AppendFormat(" {0} {1}", SampleTerms[Random.Next(SampleTerms.Length)], Random.Next(32768).ToString());
             }
             return phrase.ToString();
         }
