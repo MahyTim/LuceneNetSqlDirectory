@@ -44,7 +44,7 @@ namespace SqlDirectory.Demo
             indexWriter.SetInfoStream(new StreamWriter(Console.OpenStandardOutput()));
             indexWriter.UseCompoundFile = false;
 
-            for (int iDoc = 0; iDoc < 10 * 100; iDoc++)
+            for (int iDoc = 0; iDoc < 10 * 10; iDoc++)
             {
                 if (iDoc % 10 == 0)
                     Console.WriteLine(iDoc);

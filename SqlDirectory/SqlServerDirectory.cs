@@ -65,8 +65,14 @@ namespace SqlDirectory
 
         public override IndexOutput CreateOutput(string name)
         {
-            _connection.Execute($"INSERT INTO {_options.SchemaName}.FileMetaData (Name,LastTouched) VALUES (@name,SYSUTCDATETIME())", new { name });
-            _connection.Execute($"INSERT INTO {_options.SchemaName}.FileContents (Name,Content) VALUES (@name,null)", new { name });
+            if (0 == _connection.ExecuteScalar<int>($"SELECT COUNT(0) FROM {_options.SchemaName}.FileContents WHERE Name = @name", new { name }))
+            {
+                _connection.Execute($"INSERT INTO {_options.SchemaName}.FileContents (Name,Content) VALUES (@name,null)", new { name });
+            }
+            if (0 == _connection.ExecuteScalar<int>($"SELECT COUNT(0) FROM {_options.SchemaName}.FileMetaData WHERE Name = @name", new { name }))
+            {
+                _connection.Execute($"INSERT INTO {_options.SchemaName}.FileMetaData (Name,LastTouched) VALUES (@name,SYSUTCDATETIME())", new { name });
+            }
             return new SqlServerIndexOutput(_connection, name, _options);
         }
 
