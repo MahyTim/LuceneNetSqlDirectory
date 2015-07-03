@@ -1,0 +1,13 @@
+c:\users\tim\documents\visual studio 2013\Projects\SqlDirectory\SqlDirectory\bin\Debug\SqlDirectory.exe.config
+c:\users\tim\documents\visual studio 2013\Projects\SqlDirectory\SqlDirectory\bin\Debug\SqlDirectory.exe
+c:\users\tim\documents\visual studio 2013\Projects\SqlDirectory\SqlDirectory\bin\Debug\SqlDirectory.pdb
+c:\users\tim\documents\visual studio 2013\Projects\SqlDirectory\SqlDirectory\bin\Debug\ICSharpCode.SharpZipLib.dll
+c:\users\tim\documents\visual studio 2013\Projects\SqlDirectory\SqlDirectory\bin\Debug\Lucene.Net.dll
+c:\users\tim\documents\visual studio 2013\Projects\SqlDirectory\SqlDirectory\bin\Debug\Lucene.Net.pdb
+c:\users\tim\documents\visual studio 2013\Projects\SqlDirectory\SqlDirectory\bin\Debug\Lucene.Net.xml
+c:\users\tim\documents\visual studio 2013\Projects\SqlDirectory\SqlDirectory\obj\Debug\SqlDirectory.csprojResolveAssemblyReference.cache
+c:\users\tim\documents\visual studio 2013\Projects\SqlDirectory\SqlDirectory\obj\Debug\SqlDirectory.exe
+c:\users\tim\documents\visual studio 2013\Projects\SqlDirectory\SqlDirectory\obj\Debug\SqlDirectory.pdb
+C:\Users\Tim\documents\visual studio 2013\Projects\SqlDirectory\SqlDirectory\bin\Debug\Dapper.dll
+C:\Users\Tim\documents\visual studio 2013\Projects\SqlDirectory\SqlDirectory\bin\Debug\Dapper.pdb
+C:\Users\Tim\documents\visual studio 2013\Projects\SqlDirectory\SqlDirectory\bin\Debug\Dapper.xml
