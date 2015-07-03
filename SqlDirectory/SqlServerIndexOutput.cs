@@ -26,39 +26,35 @@ namespace SqlDirectory
             WriteBytes(new[] { b }, 0, 1);
         }
 
-        private List<PendingWrite> _pendingWrites = new List<PendingWrite>();
+        private ByteWriter _buffer = new ByteWriter(4082);
 
-        class PendingWrite
-        {
-            public byte[] Buffer { get; set; }
-            public int Length { get; set; }
-            public long Position { get; set; }
-        }
+        //class PendingWrite
+        //{
+        //    public byte[] Buffer { get; set; }
+        //    public int Length { get; set; }
+        //    public long Position { get; set; }
+        //}
 
         public override void WriteBytes(byte[] b, int offset, int length)
         {
             var segment = new byte[length];
             Buffer.BlockCopy(b, offset, segment, 0, length);
-            _pendingWrites.Add(new PendingWrite()
-            {
-                Buffer = segment,
-                Length = length,
-                Position = _pointer
-            });
+            _buffer.Add(_pointer, segment);
             _pointer += length;
         }
 
         public override void Flush()
         {
-            if (_pendingWrites.Any())
+            var segments = _buffer.GetSegments();
+            if (segments.Any())
             {
                 var isFirst = Length == 0;
-                foreach (var pendingWrite in _pendingWrites)
+                foreach (var segment in segments)
                 {
-                    _connection.Write(pendingWrite.Buffer, (int)pendingWrite.Position, pendingWrite.Length, _name, isFirst, _options.SchemaName);
+                    _connection.Write(segment.Buffer, (int)segment.Position, segment.Buffer.Length, _name, isFirst, _options.SchemaName);
                     isFirst = false;
                 }
-                _pendingWrites.Clear();
+                _buffer = new ByteWriter(4082);
             }
         }
 
