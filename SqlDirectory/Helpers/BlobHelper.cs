@@ -1,18 +1,15 @@
-using System;
-using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
-using System.IO;
 
 namespace SqlDirectory
 {
     static class BlobHelper
     {
-        public static void ReadBytes(this SqlConnection connection, string name, long position, byte[] b, int offset, int len)
+        public static void ReadBytes(this SqlConnection connection, string name, long position, byte[] b, int offset, int len,string schemaName)
         {
             if (b.Length == 0)
                 return;
-            using (var command = new SqlCommand("SELECT Content FROM FileContents WHERE Name = @name", connection))
+            using (var command = new SqlCommand($"SELECT Content FROM {schemaName}.[FileContents] WHERE Name = @name", connection))
             {
                 command.Parameters.AddWithValue("name", name);
                 using (var reader = command.ExecuteReader(CommandBehavior.SequentialAccess))
@@ -29,12 +26,12 @@ namespace SqlDirectory
             }
         }
 
-        public static void Write(this SqlConnection connection, byte[] buffer, int index, int count, string name, bool isFirstWrite)
+        public static void Write(this SqlConnection connection, byte[] buffer, int index, int count, string name, bool isFirstWrite, string schemaName)
         {
-            using (var cmdFirstChunk = new SqlCommand(@"UPDATE dbo.FileContents SET [Content] = @firstChunk WHERE [Name] = @name", connection))
+            using (var cmdFirstChunk = new SqlCommand($"UPDATE {schemaName}.[FileContents] SET [Content] = @firstChunk WHERE [Name] = @name", connection))
             {
                 cmdFirstChunk.Parameters.AddWithValue("@name", name);
-                using (var cmdAppendChunk = new SqlCommand(@"UPDATE dbo.FileContents  SET [Content].WRITE(@chunk, @index, @count) WHERE [Name] = @name", connection))
+                using (var cmdAppendChunk = new SqlCommand($"UPDATE {schemaName}.[FileContents] SET [Content].WRITE(@chunk, @index, @count) WHERE [Name] = @name", connection))
                 {
                     cmdAppendChunk.Parameters.AddWithValue("@name", name);
 

@@ -1,6 +1,4 @@
-using System;
 using System.Data.SqlClient;
-using System.Net.Sockets;
 using Dapper;
 using Lucene.Net.Store;
 
@@ -9,20 +7,22 @@ namespace SqlDirectory
     internal class SqlServerLockFactory : LockFactory
     {
         private readonly SqlConnection _connection;
+        private readonly Options _options;
 
-        internal SqlServerLockFactory(SqlConnection connection)
+        internal SqlServerLockFactory(SqlConnection connection, Options options)
         {
             _connection = connection;
+            _options = options;
         }
 
         public override Lock MakeLock(string lockName)
         {
-            return new SqlServerLock(_connection, lockName);
+            return new SqlServerLock(_connection, lockName, _options);
         }
 
         public override void ClearLock(string lockName)
         {
-            _connection.Execute("DELETE FROM dbo.Locks Where Name = @name", new { name = lockName });
+            _connection.Execute($"DELETE FROM {_options.SchemaName}.Locks Where Name = @name", new { name = lockName });
         }
     }
 }

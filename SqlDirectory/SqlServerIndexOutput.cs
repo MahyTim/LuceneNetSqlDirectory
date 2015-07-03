@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
 using Dapper;
 using Lucene.Net.Store;
@@ -10,12 +9,14 @@ namespace SqlDirectory
     {
         private readonly SqlConnection _connection;
         private readonly string _name;
-        private long _pointer = 0;
+        private readonly Options _options;
+        private long _pointer;
 
-        public SqlServerIndexOutput(SqlConnection connection, string name)
+        public SqlServerIndexOutput(SqlConnection connection, string name, Options options)
         {
             _connection = connection;
             _name = name;
+            _options = options;
         }
 
         public override void WriteByte(byte b)
@@ -23,26 +24,26 @@ namespace SqlDirectory
             WriteBytes(new[] { b }, 0, 1);
         }
 
-        private bool? isFirst = true;
+        private bool? _isFirst = true;
 
 
         public override void WriteBytes(byte[] b, int offset, int length)
         {
-            if (isFirst == null)
+            if (_isFirst == null)
             {
-                isFirst = Length == 0;
+                _isFirst = Length == 0;
             }
             if (length == 1)
             {
-                _connection.Write(new[] { b[0] }, (int)_pointer, 1, _name, isFirst.Value);
-                isFirst = false;
+                _connection.Write(new[] { b[0] }, (int)_pointer, 1, _name, _isFirst.Value, _options.SchemaName);
+                _isFirst = false;
             }
             else if (length > 1)
             {
                 var segment = new byte[length];
                 Buffer.BlockCopy(b, offset, segment, 0, length);
-                _connection.Write(segment, (int)_pointer, length, _name, isFirst.Value);
-                isFirst = false;
+                _connection.Write(segment, (int)_pointer, length, _name, _isFirst.Value, _options.SchemaName);
+                _isFirst = false;
             }
             _pointer += length;
         }
@@ -60,14 +61,8 @@ namespace SqlDirectory
             _pointer = pos;
         }
 
-        public override long FilePointer
-        {
-            get { return _pointer; }
-        }
+        public override long FilePointer => _pointer;
 
-        public override long Length
-        {
-            get { return _connection.ExecuteScalar<long>("SELECT DATALENGTH(Content) FROM dbo.FileContents WHERE name = @name", new { name = _name }); }
-        }
+        public override long Length => _connection.ExecuteScalar<long>($"SELECT DATALENGTH(Content) FROM {_options.SchemaName}.FileContents WHERE name = @name", new { name = _name });
     }
 }

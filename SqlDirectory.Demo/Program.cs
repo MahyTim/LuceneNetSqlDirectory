@@ -22,11 +22,9 @@ namespace SqlDirectory.Demo
             var connection = new SqlConnection(@"MultipleActiveResultSets=True;Data Source=(localdb)\v11.0;Initial Catalog=TestLucene;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False");
             connection.Open();
 
-            connection.Execute("DELETE FROM Locks");
-            //connection.Execute("DELETE FROM FileMetaData");
-            //connection.Execute("DELETE FROM FileContents");
+            SqlServerDirectory.ProvisionDatabase(connection, "[search]", true);
 
-            var directory = new SqlServerDirectory(connection);
+            var directory = new SqlServerDirectory(connection, new Options() { SchemaName = "[search]" });
 
             IndexWriter indexWriter = null;
             while (indexWriter == null)
@@ -99,7 +97,7 @@ namespace SqlDirectory.Demo
 
         static Random _random = new Random((int)DateTime.Now.Ticks);
         static string[] sampleTerms =
-            { 
+            {
                 "dog","cat","car","horse","door","tree","chair","microsoft","apple","adobe","google","golf","linux","windows","firefox","mouse","hornet","monkey","giraffe","computer","monitor",
                 "steve","fred","lili","albert","tom","shane","gerald","chris",
                 "love","hate","scared","fast","slow","new","old"
