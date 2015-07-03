@@ -40,7 +40,7 @@ namespace SqlDirectory.Demo
                 }
             };
             Console.WriteLine("IndexWriter lock obtained, this process has exclusive write access to index");
-            indexWriter.SetRAMBufferSizeMB(10.0);
+            indexWriter.SetRAMBufferSizeMB(100.0);
             indexWriter.SetInfoStream(new StreamWriter(Console.OpenStandardOutput()));
             indexWriter.UseCompoundFile = false;
 
@@ -76,7 +76,7 @@ namespace SqlDirectory.Demo
 
             while (true)
             {
-                SearchForPhrase(searcher, "dog");
+                SearchForPhrase(searcher, "microsoft");
                 Console.WriteLine("Press a key to search again");
                 Console.ReadKey();
             }

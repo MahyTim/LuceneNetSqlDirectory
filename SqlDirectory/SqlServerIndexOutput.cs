@@ -13,12 +13,14 @@ namespace SqlDirectory
         private readonly string _name;
         private readonly Options _options;
         private long _pointer;
+        private SqlServerStreamingWriter _writer;
 
         public SqlServerIndexOutput(SqlConnection connection, string name, Options options)
         {
             _connection = connection;
             _name = name;
             _options = options;
+            _writer = new SqlServerStreamingWriter(connection, options.SchemaName, name);
         }
 
         public override void WriteByte(byte b)
@@ -26,34 +28,24 @@ namespace SqlDirectory
             WriteBytes(new[] { b }, 0, 1);
         }
 
-        private ByteWriter _buffer = new ByteWriter(4082);
-
         public override void WriteBytes(byte[] b, int offset, int length)
         {
             var segment = new byte[length];
             Buffer.BlockCopy(b, offset, segment, 0, length);
-            _buffer.Add(_pointer, segment);
+            _writer.Add(_pointer, segment);
             _pointer += length;
         }
 
         public override void Flush()
         {
-            var segments = _buffer.GetSegments();
-            if (segments.Any())
-            {
-                var isFirst = Length == 0;
-                foreach (var segment in segments)
-                {
-                    _connection.Write(segment.Buffer, (int)segment.Position, segment.Buffer.Length, _name, isFirst, _options.SchemaName);
-                    isFirst = false;
-                }
-                _buffer = new ByteWriter(4082);
-            }
+            _writer.Write(() => Length);
         }
 
         protected override void Dispose(bool disposing)
         {
             Flush();
+            if (disposing)
+                _writer.Dispose();
         }
 
         public override void Seek(long pos)
