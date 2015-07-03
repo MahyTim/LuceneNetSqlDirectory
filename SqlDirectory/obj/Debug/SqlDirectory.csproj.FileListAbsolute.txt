@@ -11,3 +11,16 @@ c:\users\tim\documents\visual studio 2013\Projects\SqlDirectory\SqlDirectory\obj
 C:\Users\Tim\documents\visual studio 2013\Projects\SqlDirectory\SqlDirectory\bin\Debug\Dapper.dll
 C:\Users\Tim\documents\visual studio 2013\Projects\SqlDirectory\SqlDirectory\bin\Debug\Dapper.pdb
 C:\Users\Tim\documents\visual studio 2013\Projects\SqlDirectory\SqlDirectory\bin\Debug\Dapper.xml
+C:\Users\Tim\Source\Repos\LuceneNetSqlDirectory\SqlDirectory\obj\Debug\SqlDirectory.pdb
+C:\Users\Tim\Source\Repos\LuceneNetSqlDirectory\SqlDirectory\bin\Debug\SqlDirectory.dll.config
+C:\Users\Tim\Source\Repos\LuceneNetSqlDirectory\SqlDirectory\bin\Debug\SqlDirectory.dll
+C:\Users\Tim\Source\Repos\LuceneNetSqlDirectory\SqlDirectory\bin\Debug\SqlDirectory.pdb
+C:\Users\Tim\Source\Repos\LuceneNetSqlDirectory\SqlDirectory\bin\Debug\Dapper.dll
+C:\Users\Tim\Source\Repos\LuceneNetSqlDirectory\SqlDirectory\bin\Debug\ICSharpCode.SharpZipLib.dll
+C:\Users\Tim\Source\Repos\LuceneNetSqlDirectory\SqlDirectory\bin\Debug\Lucene.Net.dll
+C:\Users\Tim\Source\Repos\LuceneNetSqlDirectory\SqlDirectory\bin\Debug\Dapper.pdb
+C:\Users\Tim\Source\Repos\LuceneNetSqlDirectory\SqlDirectory\bin\Debug\Dapper.xml
+C:\Users\Tim\Source\Repos\LuceneNetSqlDirectory\SqlDirectory\bin\Debug\Lucene.Net.pdb
+C:\Users\Tim\Source\Repos\LuceneNetSqlDirectory\SqlDirectory\bin\Debug\Lucene.Net.xml
+C:\Users\Tim\Source\Repos\LuceneNetSqlDirectory\SqlDirectory\obj\Debug\SqlDirectory.csprojResolveAssemblyReference.cache
+C:\Users\Tim\Source\Repos\LuceneNetSqlDirectory\SqlDirectory\obj\Debug\SqlDirectory.dll

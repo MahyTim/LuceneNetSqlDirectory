@@ -6,7 +6,7 @@ using Lucene.Net.Store;
 
 namespace SqlDirectory
 {
-    class SqlServerDirectory : Directory
+    public class SqlServerDirectory : Directory
     {
         private readonly SqlConnection _connection;
         public SqlServerDirectory(SqlConnection connection)

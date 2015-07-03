@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Dapper;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
@@ -14,7 +11,7 @@ using Lucene.Net.Index;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
 
-namespace SqlDirectory
+namespace SqlDirectory.Demo
 {
     class Program
     {
@@ -36,7 +33,7 @@ namespace SqlDirectory
             {
                 try
                 {
-                    indexWriter = new IndexWriter(directory, new StandardAnalyzer(Lucene.Net.Util.Version.LUCENE_CURRENT), !IndexReader.IndexExists(directory), new Lucene.Net.Index.IndexWriter.MaxFieldLength(IndexWriter.DEFAULT_MAX_FIELD_LENGTH));
+                    indexWriter = new IndexWriter(directory, new StandardAnalyzer(Lucene.Net.Util.Version.LUCENE_30), !IndexReader.IndexExists(directory), new Lucene.Net.Index.IndexWriter.MaxFieldLength(IndexWriter.DEFAULT_MAX_FIELD_LENGTH));
                 }
                 catch (LockObtainFailedException)
                 {
@@ -49,7 +46,7 @@ namespace SqlDirectory
             indexWriter.SetInfoStream(new StreamWriter(Console.OpenStandardOutput()));
             indexWriter.UseCompoundFile = false;
 
-            for (int iDoc = 0; iDoc < 10 * 10 * 1000; iDoc++)
+            for (int iDoc = 0; iDoc < 10 * 100; iDoc++)
             {
                 if (iDoc % 10 == 0)
                     Console.WriteLine(iDoc);
@@ -92,7 +89,7 @@ namespace SqlDirectory
         {
             using (new AutoStopWatch(string.Format("Search for {0}", phrase)))
             {
-                Lucene.Net.QueryParsers.QueryParser parser = new Lucene.Net.QueryParsers.QueryParser(Lucene.Net.Util.Version.LUCENE_CURRENT, "Body", new StandardAnalyzer(Lucene.Net.Util.Version.LUCENE_CURRENT));
+                Lucene.Net.QueryParsers.QueryParser parser = new Lucene.Net.QueryParsers.QueryParser(Lucene.Net.Util.Version.LUCENE_30, "Body", new StandardAnalyzer(Lucene.Net.Util.Version.LUCENE_30));
                 Lucene.Net.Search.Query query = parser.Parse(phrase);
 
                 var hits = searcher.Search(query, 100);

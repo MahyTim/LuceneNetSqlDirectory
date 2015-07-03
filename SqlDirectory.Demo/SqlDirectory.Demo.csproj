@@ -4,18 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{931814DD-8065-41E8-8472-8641FD1CF110}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{8F23F31B-5B1C-4B1D-BCE8-48033A3457A8}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SqlDirectory</RootNamespace>
-    <AssemblyName>SqlDirectory</AssemblyName>
+    <RootNamespace>SqlDirectory.Demo</RootNamespace>
+    <AssemblyName>SqlDirectory.Demo</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccProvider>SAK</SccProvider>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -36,9 +32,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Dapper">
       <HintPath>..\packages\Dapper.1.42\lib\net45\Dapper.dll</HintPath>
@@ -58,20 +51,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BlobHelper.cs" />
+    <Compile Include="Program.cs">
+      <SubType>
+      </SubType>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SqlServerDirectory.cs" />
-    <Compile Include="SqlServerIndexInput.cs" />
-    <Compile Include="SqlServerIndexOutput.cs" />
-    <Compile Include="SqlServerLock.cs" />
-    <Compile Include="SqlServerLockFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Schema.sql" />
+    <ProjectReference Include="..\SqlDirectory\SqlDirectory.csproj">
+      <Project>{931814dd-8065-41e8-8472-8641fd1cf110}</Project>
+      <Name>SqlDirectory</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
