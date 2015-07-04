@@ -24,12 +24,11 @@ namespace SqlDirectory.Demo
                 SqlServerDirectory.ProvisionDatabase(connection, "[search]", true);
             }
 
-            //var t1 = Task.Factory.StartNew(Do);
-            //var t2 = Task.Factory.StartNew(Do);
-            //var t3 = Task.Factory.StartNew(Do);
+            var t1 = Task.Factory.StartNew(Do);
+            var t2 = Task.Factory.StartNew(Do);
+            var t3 = Task.Factory.StartNew(Do);
 
-            //Task.WaitAll(t1, t2, t3);
-            LockCanBeReleased();
+            Task.WaitAll(t1, t2, t3);
         }
 
         static void LockCanBeReleased()
