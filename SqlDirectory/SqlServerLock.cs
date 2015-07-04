@@ -1,3 +1,4 @@
+using System;
 using System.Data.SqlClient;
 using Dapper;
 using Lucene.Net.Store;
@@ -19,20 +20,34 @@ namespace SqlDirectory
 
         public override bool Obtain()
         {
+            ReleaseLocksByReleaseTimestamp();
             if (IsLocked())
                 return false;
-            _connection.Execute($"INSERT INTO {_options.SchemaName}.Locks (Name) VALUES (@name)", new { name = _lockName });
+            try
+            {
+                _connection.Execute($"INSERT INTO {_options.SchemaName}.Locks (Name,LockReleaseTimestamp) VALUES (@name,DATEADD(MINUTE, @minutesToAdd, SYSUTCDATETIME()))", new { name = _lockName, minutesToAdd = _options.LockTimeoutInMinutes });
+            }
+            catch (SqlException ex) when (ex.Number == 2627) // Duplicate key --> duplicate lock
+            {
+                return false;
+            }
             return true;
+        }
+
+        private void ReleaseLocksByReleaseTimestamp()
+        {
+            _connection.Execute($"DELETE FROM {_options.SchemaName}.[Locks] WHERE LockReleaseTimestamp < SYSUTCDATETIME()");
         }
 
         public override void Release()
         {
-            _connection.Execute($"DELETE FROM {_options.SchemaName}.Locks Where Name = @name", new { name = _lockName });
+            _connection.Execute($"DELETE FROM {_options.SchemaName}.[Locks] WHERE Name = @name", new { name = _lockName });
+            ReleaseLocksByReleaseTimestamp();
         }
 
         public override bool IsLocked()
         {
-            return _connection.ExecuteScalar<int>($"SELECT COUNT(1) FROM {_options.SchemaName}.Locks where Name = @name",new { name = _lockName }) != 0;
+            return _connection.ExecuteScalar<int>($"SELECT COUNT(1) FROM {_options.SchemaName}.[Locks] WHERE Name = @name AND LockReleaseTimestamp > SYSUTCDATETIME()", new { name = _lockName }) != 0;
         }
     }
 }
