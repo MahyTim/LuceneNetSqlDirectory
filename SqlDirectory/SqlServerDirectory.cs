@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Data.SqlClient;
 using System.Linq;
 using Dapper;
@@ -15,7 +16,34 @@ namespace SqlDirectory
         {
             _connection = connection;
             _options = options;
+            ValidateConfiguration();
             SetLockFactory(new SqlServerLockFactory(connection, options));
+        }
+
+        private void ValidateConfiguration()
+        {
+            { // Validate if the required database structure is available
+                var tables = _connection.GetSchema("Tables");
+                var alltablesAreAvailable = tables.Select($"(TABLE_NAME = 'Locks' OR TABLE_NAME = 'FileMetaData' OR TABLE_NAME = 'FileContents' ) AND ( TABLE_SCHEMA = '{ SqlHelper.RemoveBrackets(_options.SchemaName)}')").Count() == 3;
+                if (false == alltablesAreAvailable)
+                {
+                    throw new ConfigurationErrorsException($"The database structure required for the SQLServerDirectory are not available in database : '{_connection.Database}'");
+                }
+            }
+            { // Validate if MARS is enabled because we need this to read efficiently!
+                var connectionString = new SqlConnectionStringBuilder(_connection.ConnectionString);
+                if (connectionString.MultipleActiveResultSets == false)
+                {
+                    throw new ConfigurationErrorsException($"The given connection does not have 'MultipleActiveResultSets' enabled. SQLServerDirectory requires this feature in order to read efficiently from the database using multiple readers. Please add the following in the connectionstring that is used for the given connection : 'MultipleActiveResultSets=True;'");
+
+                }
+            } // We require MS SQLServer 2008 or higher (the lowest dependency today is DateTime2 type)
+            {
+                if (Convert.ToInt16(_connection.ServerVersion.Split('.')[0]) < 10)
+                {
+                    throw new ConfigurationErrorsException($"The database server used for the SQLServerDirectory should be at least a MSSQLServer 2008. Required version: 10, current version: {_connection.ServerVersion}");
+                }
+            }
         }
 
         public static void ProvisionDatabase(SqlConnection connection, string schemaName = "[dbo]", bool dropExisting = false)
@@ -43,13 +71,13 @@ namespace SqlDirectory
 
         public override long FileModified(string name)
         {
-            var lastTouched = _connection.ExecuteScalar<DateTimeOffset>($"SElECT TOP 1 LastTouched FROM {_options.SchemaName}.FileMetaData WHERE name = @name", new { name });
+            var lastTouched = _connection.ExecuteScalar<DateTimeOffset>($"SElECT TOP 1 LastTouchedTimestamp FROM {_options.SchemaName}.FileMetaData WHERE name = @name", new { name });
             return lastTouched.UtcTicks;
         }
 
         public override void TouchFile(string name)
         {
-            _connection.Execute($"UPDATE {_options.SchemaName}.FileMetaData SET LastTouched = SYSUTCDATETIME() WHERE name = @name ", new { name });
+            _connection.Execute($"UPDATE {_options.SchemaName}.FileMetaData SET LastTouchedTimestamp = SYSUTCDATETIME() WHERE name = @name ", new { name });
         }
 
         public override void DeleteFile(string name)
@@ -71,7 +99,7 @@ namespace SqlDirectory
             }
             if (0 == _connection.ExecuteScalar<int>($"SELECT COUNT(0) FROM {_options.SchemaName}.FileMetaData WHERE Name = @name", new { name }))
             {
-                _connection.Execute($"INSERT INTO {_options.SchemaName}.FileMetaData (Name,LastTouched) VALUES (@name,SYSUTCDATETIME())", new { name });
+                _connection.Execute($"INSERT INTO {_options.SchemaName}.FileMetaData (Name,LastTouchedTimestamp) VALUES (@name,SYSUTCDATETIME())", new { name });
             }
             return new SqlServerIndexOutput(_connection, name, _options);
         }

@@ -26,13 +26,13 @@ namespace SqlDirectory
         {
             if (isFirstWrite)
             {
-                using (var cmdFirstChunk = new SqlCommand($"UPDATE {_schemaName}.[FileContents] SET [Content] = @firstChunk WHERE [Name] = @name", _connection))
+                using (var insertCommand = new SqlCommand($"UPDATE {_schemaName}.[FileContents] SET [Content] = @firstChunk WHERE [Name] = @name", _connection))
                 {
-                    cmdFirstChunk.Parameters.AddWithValue("name", _name);
+                    insertCommand.Parameters.AddWithValue("name", _name);
                     var paramChunk = new SqlParameter("@firstChunk", SqlDbType.VarBinary, -1);
-                    cmdFirstChunk.Parameters.Add(paramChunk);
+                    insertCommand.Parameters.Add(paramChunk);
                     paramChunk.Value = buffer;
-                    cmdFirstChunk.ExecuteNonQuery();
+                    insertCommand.ExecuteNonQuery();
                 }
             }
             _updateCommand = _updateCommand ?? new SqlCommand($"UPDATE {_schemaName}.[FileContents] SET [Content].WRITE(@chunk, @index, @len) WHERE [Name] = @name", _connection);

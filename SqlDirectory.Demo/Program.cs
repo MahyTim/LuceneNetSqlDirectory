@@ -89,16 +89,16 @@ namespace SqlDirectory.Demo
                 indexWriter.SetInfoStream(new StreamWriter(Console.OpenStandardOutput()));
                 indexWriter.UseCompoundFile = false;
 
-                for (int iDoc = 0; iDoc < 10000; iDoc++)
+                for (int iDoc = 0; iDoc < 1000; iDoc++)
                 {
                     if (iDoc % 10 == 0)
                         Console.WriteLine(iDoc);
                     Document doc = new Document();
                     doc.Add(new Field("id", DateTime.Now.ToFileTimeUtc().ToString(), Field.Store.YES,
                         Field.Index.ANALYZED, Field.TermVector.NO));
-                    doc.Add(new Field("Title", "dog " + GeneratePhrase(200), Field.Store.NO, Field.Index.ANALYZED,
+                    doc.Add(new Field("Title", "dog " + GeneratePhrase(50), Field.Store.NO, Field.Index.ANALYZED,
                         Field.TermVector.NO));
-                    doc.Add(new Field("Body", "dog " + GeneratePhrase(200), Field.Store.NO, Field.Index.ANALYZED,
+                    doc.Add(new Field("Body", "dog " + GeneratePhrase(50), Field.Store.NO, Field.Index.ANALYZED,
                         Field.TermVector.NO));
                     indexWriter.AddDocument(doc);
                 }
