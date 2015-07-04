@@ -6,7 +6,7 @@ Store your Lucene.NET files in a SQLServer using this Directory implementation.
 
 Being fed up of having to go into discussions on shared filesystems we decided to store the index in a Microsoft SQLServer database. In contrast to the Java JDBCDirectory, this implementation is only aimed at storing it in MS SQLServer 2008 or higher, using it's advanced (but specific) random read/write capabilities.
 
-Please notice that this implementation only intends to give a solution to indexes for less than 2 GB and that for high & concurrent write and near realtime search we suggest to look at [ElasticSearch](https://www.elastic.co/) or [Solr](http://lucene.apache.org/solr/) or managed services such as [http://azure.microsoft.com/en-us/services/search/](http://azure.microsoft.com/en-us/services/search/ "Azure Search").
+Please notice that this implementation only intends to give a solution to indexes for less than 2 GB and that for high & concurrent write and near realtime search we suggest to look at [ElasticSearch](https://www.elastic.co/) or [Solr](http://lucene.apache.org/solr/) or managed services such as [Azure Search](http://azure.microsoft.com/en-us/services/search/ "Azure Search").
 
 ## How to use ##
     using (var connection = new SqlConnection(@"......")) {
