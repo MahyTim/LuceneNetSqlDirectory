@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using Dapper;
@@ -14,6 +15,11 @@ namespace SqlDirectory
 
         public SqlServerDirectory(SqlConnection connection, Options options)
         {
+            if(connection == null)
+                throw new ArgumentNullException(nameof(connection));
+            if(options == null)
+                throw new ArgumentNullException(nameof(options));
+
             _connection = connection;
             _options = options;
             ValidateConfiguration();
@@ -22,6 +28,12 @@ namespace SqlDirectory
 
         private void ValidateConfiguration()
         {
+            { // Connection management should be done outside this library
+                if (_connection.State != ConnectionState.Open)
+                {
+                    throw new ConfigurationErrorsException($"The connection is not open. SQLServerDirectory does not perform any connection management (opening, disposing or closing), this should be handled by the calling application.");
+                }
+            }
             { // Validate if the required database structure is available
                 var tables = _connection.GetSchema("Tables");
                 var alltablesAreAvailable = tables.Select($"(TABLE_NAME = 'Locks' OR TABLE_NAME = 'FileMetaData' OR TABLE_NAME = 'FileContents' ) AND ( TABLE_SCHEMA = '{ SqlHelper.RemoveBrackets(_options.SchemaName)}')").Count() == 3;
