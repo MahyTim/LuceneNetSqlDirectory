@@ -21,14 +21,14 @@ namespace SqlDirectory.Demo
             using (var connection = new SqlConnection(@"MultipleActiveResultSets=True;Data Source=(localdb)\v11.0;Initial Catalog=TestLucene;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False"))
             {
                 connection.Open();
-                SqlServerDirectory.ProvisionDatabase(connection, "[search]", true);
+                SqlServerDirectory.ProvisionDatabase(connection, schemaName: "[search]", dropExisting: true);
             }
 
             var t1 = Task.Factory.StartNew(Do);
-            var t2 = Task.Factory.StartNew(Do);
-            var t3 = Task.Factory.StartNew(Do);
-
-            Task.WaitAll(t1, t2, t3);
+            //var t2 = Task.Factory.StartNew(Do);
+            //var t3 = Task.Factory.StartNew(Do);
+            t1.Wait();
+            //Task.WaitAll(t1, t2, t3);
         }
 
         static void LockCanBeReleased()
@@ -68,46 +68,51 @@ namespace SqlDirectory.Demo
                 connection.Open();
                 var directory = new SqlServerDirectory(connection, new Options() { SchemaName = "[search]" });
 
-                IndexWriter indexWriter = null;
-                while (indexWriter == null)
+                for (int outer = 0; outer < 1000; outer++)
                 {
-                    try
+
+
+                    IndexWriter indexWriter = null;
+                    while (indexWriter == null)
                     {
-                        indexWriter = new IndexWriter(directory, new StandardAnalyzer(Lucene.Net.Util.Version.LUCENE_30),
-                            !IndexReader.IndexExists(directory),
-                            new Lucene.Net.Index.IndexWriter.MaxFieldLength(IndexWriter.DEFAULT_MAX_FIELD_LENGTH));
+                        try
+                        {
+                            indexWriter = new IndexWriter(directory, new StandardAnalyzer(Lucene.Net.Util.Version.LUCENE_30),
+                                !IndexReader.IndexExists(directory),
+                                new Lucene.Net.Index.IndexWriter.MaxFieldLength(IndexWriter.DEFAULT_MAX_FIELD_LENGTH));
+                        }
+                        catch (LockObtainFailedException)
+                        {
+                            Console.WriteLine("Lock is taken, waiting for timeout...");
+                            Thread.Sleep(1000);
+                        }
                     }
-                    catch (LockObtainFailedException)
-                    {
-                        Console.WriteLine("Lock is taken, waiting for timeout...");
-                        Thread.Sleep(1000);
-                    }
-                }
                 ;
-                Console.WriteLine("IndexWriter lock obtained, this process has exclusive write access to index");
-                indexWriter.SetRAMBufferSizeMB(100.0);
-                indexWriter.SetInfoStream(new StreamWriter(Console.OpenStandardOutput()));
-                indexWriter.UseCompoundFile = false;
+                    Console.WriteLine("IndexWriter lock obtained, this process has exclusive write access to index");
+                    indexWriter.SetRAMBufferSizeMB(100.0);
+                    indexWriter.SetInfoStream(new StreamWriter(Console.OpenStandardOutput()));
+                    indexWriter.UseCompoundFile = false;
 
-                for (int iDoc = 0; iDoc < 1000; iDoc++)
-                {
-                    if (iDoc % 10 == 0)
-                        Console.WriteLine(iDoc);
-                    Document doc = new Document();
-                    doc.Add(new Field("id", DateTime.Now.ToFileTimeUtc().ToString(), Field.Store.YES,
-                        Field.Index.ANALYZED, Field.TermVector.NO));
-                    doc.Add(new Field("Title", "dog " + GeneratePhrase(50), Field.Store.NO, Field.Index.ANALYZED,
-                        Field.TermVector.NO));
-                    doc.Add(new Field("Body", "dog " + GeneratePhrase(50), Field.Store.NO, Field.Index.ANALYZED,
-                        Field.TermVector.NO));
-                    indexWriter.AddDocument(doc);
+                    for (int iDoc = 0; iDoc < 1000; iDoc++)
+                    {
+                        if (iDoc % 10 == 0)
+                            Console.WriteLine(iDoc);
+                        Document doc = new Document();
+                        doc.Add(new Field("id", DateTime.Now.ToFileTimeUtc().ToString(), Field.Store.YES,
+                            Field.Index.ANALYZED, Field.TermVector.NO));
+                        doc.Add(new Field("Title", "dog " + GeneratePhrase(50), Field.Store.NO, Field.Index.ANALYZED,
+                            Field.TermVector.NO));
+                        doc.Add(new Field("Body", "dog " + GeneratePhrase(50), Field.Store.NO, Field.Index.ANALYZED,
+                            Field.TermVector.NO));
+                        indexWriter.AddDocument(doc);
+                    }
+
+                    Console.WriteLine("Total docs is {0}", indexWriter.NumDocs());
+
+                    Console.Write("Flushing and disposing writer...");
+                    indexWriter.Flush(true, true, true);
+                    indexWriter.Dispose();
                 }
-
-                Console.Write("Flushing and disposing writer...");
-                indexWriter.Flush(true, true, true);
-                indexWriter.Dispose();
-
-                Console.WriteLine("Total docs is {0}", indexWriter.NumDocs());
 
                 IndexSearcher searcher;
 
@@ -136,7 +141,9 @@ namespace SqlDirectory.Demo
                 Lucene.Net.QueryParsers.QueryParser parser = new Lucene.Net.QueryParsers.QueryParser(Lucene.Net.Util.Version.LUCENE_30, "Body", new StandardAnalyzer(Lucene.Net.Util.Version.LUCENE_30));
                 Lucene.Net.Search.Query query = parser.Parse(phrase);
 
-                var hits = searcher.Search(query, 100);
+                var hits = searcher.Search(new TermQuery(new Term("Title", "find me")), 100);
+
+                hits = searcher.Search(query, 100);
                 Console.WriteLine("Found {0} results for {1}", hits.TotalHits, phrase);
             }
         }
