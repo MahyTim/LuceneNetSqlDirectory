@@ -1,7 +1,7 @@
 ﻿using System.Data.SqlClient;
 using Dapper;
 
-namespace SqlDirectory
+namespace LuceneNetSqlDirectory.Helpers
 {
     internal static class SqlConnectionHelper
     {

@@ -5,8 +5,9 @@ using System.Data.SqlClient;
 using System.Linq;
 using Dapper;
 using Lucene.Net.Store;
+using LuceneNetSqlDirectory.Helpers;
 
-namespace SqlDirectory
+namespace LuceneNetSqlDirectory
 {
     public sealed class SqlServerDirectory : Directory
     {

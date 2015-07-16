@@ -1,4 +1,4 @@
-namespace SqlDirectory
+namespace LuceneNetSqlDirectory
 {
     public class Options
     {

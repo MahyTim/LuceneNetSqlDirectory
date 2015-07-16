@@ -1,6 +1,6 @@
 using System;
 
-namespace SqlDirectory
+namespace LuceneNetSqlDirectory.Helpers
 {
     static class ByteHelper
     {

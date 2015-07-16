@@ -1,8 +1,9 @@
 using System.Data.SqlClient;
 using Dapper;
 using Lucene.Net.Store;
+using LuceneNetSqlDirectory.Helpers;
 
-namespace SqlDirectory
+namespace LuceneNetSqlDirectory
 {
     internal class SqlServerIndexInput : IndexInput
     {

@@ -1,11 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Linq;
 using Dapper;
 using Lucene.Net.Store;
+using LuceneNetSqlDirectory.Helpers;
 
-namespace SqlDirectory
+namespace LuceneNetSqlDirectory
 {
     class SqlServerIndexOutput : IndexOutput
     {

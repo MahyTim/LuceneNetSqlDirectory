@@ -1,9 +1,8 @@
-using System;
 using System.Data.SqlClient;
 using Dapper;
 using Lucene.Net.Store;
 
-namespace SqlDirectory
+namespace LuceneNetSqlDirectory
 {
     internal class SqlServerLock : Lock
     {

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SqlDirectory
+namespace LuceneNetSqlDirectory.Helpers
 {
     public class ByteWriter
     {

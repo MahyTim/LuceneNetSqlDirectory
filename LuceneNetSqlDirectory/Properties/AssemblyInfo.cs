@@ -1,11 +1,11 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("SqlDirectory")]
+[assembly: AssemblyTitle("LuceneNetSqlDirectory")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("SqlDirectory")]
+[assembly: AssemblyProduct("LuceneNetSqlDirectory")]
 [assembly: AssemblyCopyright("Tim Mahy")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

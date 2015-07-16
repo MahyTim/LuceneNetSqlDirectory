@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace SqlDirectory
+namespace LuceneNetSqlDirectory
 {
     public class Database
     {

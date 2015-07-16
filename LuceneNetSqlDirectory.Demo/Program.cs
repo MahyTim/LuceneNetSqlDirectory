@@ -5,14 +5,13 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Dapper;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
 
-namespace SqlDirectory.Demo
+namespace LuceneNetSqlDirectory.Demo
 {
     class Program
     {

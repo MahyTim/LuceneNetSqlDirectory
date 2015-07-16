@@ -2,7 +2,7 @@ using System;
 using System.Data;
 using System.Data.SqlClient;
 
-namespace SqlDirectory
+namespace LuceneNetSqlDirectory.Helpers
 {
 
     public class SqlServerStreamingReader : IDisposable

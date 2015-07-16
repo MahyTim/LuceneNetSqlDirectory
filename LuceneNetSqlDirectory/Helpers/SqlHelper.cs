@@ -1,4 +1,4 @@
-namespace SqlDirectory
+namespace LuceneNetSqlDirectory.Helpers
 {
     static class SqlHelper
     {
