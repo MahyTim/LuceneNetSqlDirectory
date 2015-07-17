@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>LuceneNetSqlDirectory</id>
+    <version>1.1.0.0</version>
+    <title>LuceneNetSqlDirectory</title>
+    <authors>Tim Mahy</authors>
+    <owners>Tim Mahy</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+	<licenseUrl>https://github.com/MahyTim/LuceneNetSqlDirectory/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/MahyTim/LuceneNetSqlDirectory</projectUrl>
+    <description>Store your Lucene.NET files in a SQLServer database. No more need for a shared file system when operatring in a webfarm.</description>
+	<tags>Lucene LuceneNET Lucene.NET SQLServer SQL Directory LuceneNetSqlDirectory</tags>
+    <copyright>Tim Mahy</copyright>
+    <dependencies>
+      <dependency id="Dapper" version="1.42" />
+      <dependency id="Lucene.Net" version="3.0.3" />
+    </dependencies>
+  </metadata>
+</package>

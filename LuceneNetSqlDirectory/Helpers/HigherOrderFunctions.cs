@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace LuceneNetSqlDirectory.Helpers
 {
-    internal static class HigherOrderFunctions
+    static class HigherOrderFunctions
     {
         public static void ForEach<T>(this IEnumerable<T> items, Action<T> action)
         {

@@ -4,8 +4,7 @@ using System.Data.SqlClient;
 
 namespace LuceneNetSqlDirectory.Helpers
 {
-
-    public class SqlServerStreamingReader : IDisposable
+    class SqlServerStreamingReader : IDisposable
     {
         private readonly SqlConnection _connection;
         private readonly string _name;

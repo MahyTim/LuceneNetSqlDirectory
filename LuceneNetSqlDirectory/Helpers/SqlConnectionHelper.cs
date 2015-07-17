@@ -3,7 +3,7 @@ using Dapper;
 
 namespace LuceneNetSqlDirectory.Helpers
 {
-    internal static class SqlConnectionHelper
+    static class SqlConnectionHelper
     {
         public static void DropTableIfExists(this SqlConnection connection, string schemaName, string tableName)
         {

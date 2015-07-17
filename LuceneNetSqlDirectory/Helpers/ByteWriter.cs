@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace LuceneNetSqlDirectory.Helpers
 {
-    public class ByteWriter
+    class ByteWriter
     {
         private readonly long _bufferSize;
         private readonly List<Segment> _internalWriter = new List<Segment>();
