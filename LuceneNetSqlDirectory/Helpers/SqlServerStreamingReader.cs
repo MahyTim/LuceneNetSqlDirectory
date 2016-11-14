@@ -27,7 +27,7 @@ namespace LuceneNetSqlDirectory.Helpers
             {
                 return;
             }
-            if (position + len < _currentPosition)
+            if (position < _currentPosition)
             {
                 Initialize();
             }
