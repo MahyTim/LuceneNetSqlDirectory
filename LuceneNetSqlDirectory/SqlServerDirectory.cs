@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -97,23 +98,23 @@ namespace LuceneNetSqlDirectory
 
         public override void DeleteFile(string name)
         {
-            if (_runningInputs.ContainsKey(name))
+            SqlServerIndexOutput runningOutput;
+            if (_runningOutputs.TryRemove(name, out runningOutput))
             {
-                _runningInputs[name].Dispose();
-                _runningInputs.Remove(name);
+                runningOutput.Dispose();
             }
-            if (_runningOutputs.ContainsKey(name))
+            SqlServerIndexInput runningInput;
+            if (_runningInputs.TryRemove(name, out runningInput))
             {
-                _runningOutputs[name].Dispose();
-                _runningOutputs.Remove(name);
+                runningInput.Dispose();
             }
 
             _connection.Execute($"UPDATE {_options.SchemaName}.FileMetaData SET name = NEWID(), IsDeleted = 1 WHERE name = @name", new { name });
             _connection.Execute($"UPDATE {_options.SchemaName}.FileContents SET name = NEWID(), IsDeleted = 1 WHERE name = @name", new { name });
         }
 
-        private readonly Dictionary<string, SqlServerIndexInput> _runningInputs = new Dictionary<string, SqlServerIndexInput>();
-        private readonly Dictionary<string, SqlServerIndexOutput> _runningOutputs = new Dictionary<string, SqlServerIndexOutput>();
+        private readonly ConcurrentDictionary<string, SqlServerIndexInput> _runningInputs = new ConcurrentDictionary<string, SqlServerIndexInput>();
+        private readonly ConcurrentDictionary<string, SqlServerIndexOutput> _runningOutputs = new ConcurrentDictionary<string, SqlServerIndexOutput>();
 
         public override long FileLength(string name)
         {
@@ -122,10 +123,10 @@ namespace LuceneNetSqlDirectory
 
         public override IndexOutput CreateOutput(string name)
         {
-            if (_runningOutputs.ContainsKey(name))
-            { 
-               _runningOutputs[name].Dispose();
-                _runningOutputs.Remove(name);
+            SqlServerIndexOutput runningOutput;
+            if (_runningOutputs.TryRemove(name, out runningOutput))
+            {
+                runningOutput.Dispose();
             }
 
             if (0 == _connection.ExecuteScalar<int>($"SELECT COUNT(0) FROM {_options.SchemaName}.FileContents WHERE Name = @name", new { name }))
@@ -136,22 +137,23 @@ namespace LuceneNetSqlDirectory
             {
                 _connection.Execute($"INSERT INTO {_options.SchemaName}.FileMetaData (Name,LastTouchedTimestamp) VALUES (@name,SYSUTCDATETIME())", new { name });
             }
+
             var result = new SqlServerIndexOutput(_connection, name, _options);
-            _runningOutputs.Add(name, result);
+            _runningOutputs.TryAdd(name, result);
+
             return result;
         }
 
         public override IndexInput OpenInput(string name)
         {
-            if (_runningInputs.ContainsKey(name))
-            { 
-                _runningInputs[name].Dispose();
-                _runningInputs.Remove(name);
+            SqlServerIndexInput runningInput;
+            if (_runningInputs.TryRemove(name, out runningInput))
+            {
+                runningInput.Dispose();
             }
 
             var result = new SqlServerIndexInput(_connection, name, _options);
-
-            _runningInputs.Add(name, result);
+            _runningInputs.TryAdd(name, result);
             return result;
         }
 
