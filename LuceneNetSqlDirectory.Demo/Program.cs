@@ -17,7 +17,7 @@ namespace LuceneNetSqlDirectory.Demo
     {
         static void Main(string[] args)
         {
-            using (var connection = new SqlConnection(@"MultipleActiveResultSets=True;Data Source=(localdb)\v11.0;Initial Catalog=TestLucene;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False"))
+            using (var connection = new SqlConnection(@"MultipleActiveResultSets=True;Data Source=onboarding;Initial Catalog=TestLucene;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False"))
             {
                 connection.Open();
                 SqlServerDirectory.ProvisionDatabase(connection, schemaName: "[search]", dropExisting: true);
@@ -32,7 +32,7 @@ namespace LuceneNetSqlDirectory.Demo
 
         static void LockCanBeReleased()
         {
-            using (var connection = new SqlConnection(@"MultipleActiveResultSets=True;Data Source=(localdb)\v11.0;Initial Catalog=TestLucene;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False"))
+            using (var connection = new SqlConnection(@"MultipleActiveResultSets=True;Data Source=onboarding;Initial Catalog=TestLucene;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False"))
             {
                 connection.Open();
                 var directory = new SqlServerDirectory(connection, new Options() { SchemaName = "[search]", LockTimeoutInMinutes = 1 });
@@ -46,8 +46,7 @@ namespace LuceneNetSqlDirectory.Demo
                 {
                     try
                     {
-                        indexWriter = new IndexWriter(directory, new StandardAnalyzer(Lucene.Net.Util.Version.LUCENE_30),
-                            !IndexReader.IndexExists(directory),
+                        indexWriter = new IndexWriter(directory, new StandardAnalyzer(Lucene.Net.Util.Version.LUCENE_30), !IndexReader.IndexExists(directory),
                             new Lucene.Net.Index.IndexWriter.MaxFieldLength(IndexWriter.DEFAULT_MAX_FIELD_LENGTH));
                     }
                     catch (LockObtainFailedException)
@@ -62,12 +61,12 @@ namespace LuceneNetSqlDirectory.Demo
         static void Do()
         {
             //var directory = new SimpleFSDirectory(new DirectoryInfo(@"c:\temp\lucene"));
-            using (var connection = new SqlConnection(@"MultipleActiveResultSets=True;Data Source=(localdb)\v11.0;Initial Catalog=TestLucene;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False"))
+            using (var connection = new SqlConnection(@"MultipleActiveResultSets=True;Data Source=onboarding;Initial Catalog=TestLucene;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False"))
             {
                 connection.Open();
                 var directory = new SqlServerDirectory(connection, new Options() { SchemaName = "[search]" });
 
-                for (int outer = 0; outer < 1000; outer++)
+                for (int outer = 0; outer < 3; outer++)
                 {
 
 
@@ -89,13 +88,14 @@ namespace LuceneNetSqlDirectory.Demo
                 ;
                     Console.WriteLine("IndexWriter lock obtained, this process has exclusive write access to index");
                     indexWriter.SetRAMBufferSizeMB(100.0);
-                    indexWriter.SetInfoStream(new StreamWriter(Console.OpenStandardOutput()));
-                    indexWriter.UseCompoundFile = false;
+                    //indexWriter.SetInfoStream(new StreamWriter(Console.OpenStandardOutput()));
+                    var mergePolicy = new LogDocMergePolicy(indexWriter) {MinMergeDocs = 10000};
+                    indexWriter.SetMergePolicy(mergePolicy);
+                    indexWriter.SetMergeScheduler(new SerialMergeScheduler());
+                    indexWriter.SetMaxBufferedDocs(500);
 
-                    for (int iDoc = 0; iDoc < 1000; iDoc++)
+                    for (int iDoc = 0; iDoc < 1000*10; iDoc++)
                     {
-                        if (iDoc % 10 == 0)
-                            Console.WriteLine(iDoc);
                         Document doc = new Document();
                         doc.Add(new Field("id", DateTime.Now.ToFileTimeUtc().ToString(), Field.Store.YES,
                             Field.Index.ANALYZED, Field.TermVector.NO));
@@ -110,6 +110,8 @@ namespace LuceneNetSqlDirectory.Demo
 
                     Console.Write("Flushing and disposing writer...");
                     indexWriter.Flush(true, true, true);
+                    indexWriter.Commit();
+                    indexWriter.Optimize();
                     indexWriter.Dispose();
                 }
 

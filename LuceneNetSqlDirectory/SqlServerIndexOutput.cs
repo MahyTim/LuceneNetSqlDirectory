@@ -44,7 +44,13 @@ namespace LuceneNetSqlDirectory
         {
             Flush();
             if (disposing)
-                _writer.Dispose();
+            {
+                if (_writer != null)
+                {
+                    _writer.Dispose();
+                    _writer = new SqlServerStreamingWriter(_connection, _options.SchemaName, _name);
+                }
+            }
         }
 
         public override void Seek(long pos)

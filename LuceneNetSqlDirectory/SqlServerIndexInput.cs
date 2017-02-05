@@ -19,7 +19,6 @@ namespace LuceneNetSqlDirectory
             _connection = connection;
             _name = name;
             _options = options;
-            _dataReader = new SqlServerStreamingReader(connection, name, options.SchemaName);
         }
 
         public override byte ReadByte()
@@ -31,6 +30,7 @@ namespace LuceneNetSqlDirectory
 
         public override void ReadBytes(byte[] b, int offset, int len)
         {
+            _dataReader = _dataReader ?? new SqlServerStreamingReader(_connection, _name, _options.SchemaName);
             if (b.Length == 0)
                 return;
 
@@ -41,6 +41,11 @@ namespace LuceneNetSqlDirectory
 
         protected override void Dispose(bool disposing)
         {
+            if (_dataReader != null)
+            {
+                _dataReader.Dispose();
+                _dataReader = null;
+            }
         }
 
         public override void Seek(long pos)

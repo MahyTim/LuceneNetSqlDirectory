@@ -12,6 +12,7 @@ namespace LuceneNetSqlDirectory.Helpers
         private SqlCommand _command;
         private SqlDataReader _reader;
         private long _currentPosition;
+        private bool _isInitialized = false;
 
         public SqlServerStreamingReader(SqlConnection connection, string name, string schemaName)
         {
@@ -23,6 +24,11 @@ namespace LuceneNetSqlDirectory.Helpers
 
         public void ReadBytes(long position, byte[] b, int offset, int len)
         {
+            if (_isInitialized == false)
+            {
+                Initialize();
+                _isInitialized = true;
+            }
             if (false == _reader.HasRows)
             {
                 return;
@@ -55,6 +61,7 @@ namespace LuceneNetSqlDirectory.Helpers
         {
             _reader.Dispose();
             _command.Dispose();
+            _isInitialized = false;
         }
     }
 }

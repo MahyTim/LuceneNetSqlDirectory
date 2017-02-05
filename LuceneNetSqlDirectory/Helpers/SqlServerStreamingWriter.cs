@@ -71,7 +71,8 @@ namespace LuceneNetSqlDirectory.Helpers
 
         public void Dispose()
         {
-            _updateCommand.Dispose();
+            if (_updateCommand != null)
+                _updateCommand.Dispose();
         }
     }
 }

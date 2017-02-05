@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using Dapper;
 using Lucene.Net.Store;
+using Lucene.Net.Support;
 using LuceneNetSqlDirectory.Helpers;
 
 namespace LuceneNetSqlDirectory
@@ -16,9 +18,9 @@ namespace LuceneNetSqlDirectory
 
         public SqlServerDirectory(SqlConnection connection, Options options)
         {
-            if(connection == null)
+            if (connection == null)
                 throw new ArgumentNullException(nameof(connection));
-            if(options == null)
+            if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
             _connection = connection;
@@ -95,9 +97,23 @@ namespace LuceneNetSqlDirectory
 
         public override void DeleteFile(string name)
         {
-            _connection.Execute($"DELETE FROM {_options.SchemaName}.FileMetaData WHERE name = @name", new { name });
-            _connection.Execute($"DELETE FROM {_options.SchemaName}.FileContents WHERE name = @name", new { name });
+            if (_runningInputs.ContainsKey(name))
+            {
+                _runningInputs[name].Dispose();
+                _runningInputs.Remove(name);
+            }
+            if (_runningOutputs.ContainsKey(name))
+            {
+                _runningOutputs[name].Dispose();
+                _runningOutputs.Remove(name);
+            }
+
+            _connection.Execute($"UPDATE {_options.SchemaName}.FileMetaData SET name = NEWID(), IsDeleted = 1 WHERE name = @name", new { name });
+            _connection.Execute($"UPDATE {_options.SchemaName}.FileContents SET name = NEWID(), IsDeleted = 1 WHERE name = @name", new { name });
         }
+
+        private readonly Dictionary<string, SqlServerIndexInput> _runningInputs = new Dictionary<string, SqlServerIndexInput>();
+        private readonly Dictionary<string, SqlServerIndexOutput> _runningOutputs = new Dictionary<string, SqlServerIndexOutput>();
 
         public override long FileLength(string name)
         {
@@ -106,6 +122,12 @@ namespace LuceneNetSqlDirectory
 
         public override IndexOutput CreateOutput(string name)
         {
+            if (_runningOutputs.ContainsKey(name))
+            { 
+               _runningOutputs[name].Dispose();
+                _runningOutputs.Remove(name);
+            }
+
             if (0 == _connection.ExecuteScalar<int>($"SELECT COUNT(0) FROM {_options.SchemaName}.FileContents WHERE Name = @name", new { name }))
             {
                 _connection.Execute($"INSERT INTO {_options.SchemaName}.FileContents (Name,Content) VALUES (@name,null)", new { name });
@@ -114,16 +136,29 @@ namespace LuceneNetSqlDirectory
             {
                 _connection.Execute($"INSERT INTO {_options.SchemaName}.FileMetaData (Name,LastTouchedTimestamp) VALUES (@name,SYSUTCDATETIME())", new { name });
             }
-            return new SqlServerIndexOutput(_connection, name, _options);
+            var result = new SqlServerIndexOutput(_connection, name, _options);
+            _runningOutputs.Add(name, result);
+            return result;
         }
 
         public override IndexInput OpenInput(string name)
         {
-            return new SqlServerIndexInput(_connection, name, _options);
+            if (_runningInputs.ContainsKey(name))
+            { 
+                _runningInputs[name].Dispose();
+                _runningInputs.Remove(name);
+            }
+
+            var result = new SqlServerIndexInput(_connection, name, _options);
+
+            _runningInputs.Add(name, result);
+            return result;
         }
 
         protected override void Dispose(bool disposing)
         {
+            _runningInputs.Values.ForEach(z => z.Dispose());
+            _runningOutputs.Values.ForEach(z => z.Dispose());
             _connection.Dispose();
         }
     }
