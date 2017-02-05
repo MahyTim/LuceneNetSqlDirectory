@@ -93,8 +93,8 @@ namespace LuceneNetSqlDirectory.Demo
                     indexWriter.SetMergePolicy(mergePolicy);
                     indexWriter.SetMergeScheduler(new SerialMergeScheduler());
                     indexWriter.SetMaxBufferedDocs(500);
-
-                    for (int iDoc = 0; iDoc < 1000*10; iDoc++)
+                    
+                    for (int iDoc = 0; iDoc < 1000; iDoc++)
                     {
                         Document doc = new Document();
                         doc.Add(new Field("id", DateTime.Now.ToFileTimeUtc().ToString(), Field.Store.YES,
@@ -111,7 +111,7 @@ namespace LuceneNetSqlDirectory.Demo
                     Console.Write("Flushing and disposing writer...");
                     indexWriter.Flush(true, true, true);
                     indexWriter.Commit();
-                    indexWriter.Optimize();
+                    //indexWriter.Optimize();
                     indexWriter.Dispose();
                 }
 

@@ -1,3 +1,4 @@
+using System.Data;
 using System.Data.SqlClient;
 using Dapper;
 using Lucene.Net.Store;
@@ -12,7 +13,8 @@ namespace LuceneNetSqlDirectory
         private readonly Options _options;
         private long _position;
 
-        private SqlServerStreamingReader _dataReader;
+        private SqlCommand _command;
+        private SqlDataReader _reader;
 
         internal SqlServerIndexInput(SqlConnection connection, string name, Options options)
         {
@@ -30,22 +32,35 @@ namespace LuceneNetSqlDirectory
 
         public override void ReadBytes(byte[] b, int offset, int len)
         {
-            _dataReader = _dataReader ?? new SqlServerStreamingReader(_connection, _name, _options.SchemaName);
             if (b.Length == 0)
                 return;
 
-            _dataReader.ReadBytes(_position, b, offset, len);
-
+            if (_command == null || _reader == null || _reader.IsClosed || offset < _position)
+            {
+                _reader?.Dispose();
+                _command?.Dispose();
+                _command = new SqlCommand($"SELECT Content FROM {_options.SchemaName}.[FileContents] WHERE Name = @name", _connection);
+                _command.Parameters.AddWithValue("name", _name);
+                _reader = _command.ExecuteReader(CommandBehavior.SequentialAccess);
+                _reader.Read();
+            }
+            if (false == _reader.HasRows)
+            {
+                return;
+            }
+            if (false == _reader.IsDBNull(0))
+            {
+                _reader.GetBytes(0, _position, b, offset, len);
+            }
             _position += len;
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (_dataReader != null)
-            {
-                _dataReader.Dispose();
-                _dataReader = null;
-            }
+            _reader?.Dispose();
+            _command?.Dispose();
+            _reader = null;
+            _command = null;
         }
 
         public override void Seek(long pos)
