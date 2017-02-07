@@ -15,6 +15,38 @@ namespace LuceneNetSqlDirectory.Tests
     public class DemoUsage : LuceneTestCase
     {
         [TestMethod]
+        public void Demo_Optimize_Test()
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                var directory = new SqlServerDirectory(Connection, new Options());
+                var indexWriter = new IndexWriter(directory, new StandardAnalyzer(Lucene.Net.Util.Version.LUCENE_30), !IndexReader.IndexExists(directory), new Lucene.Net.Index.IndexWriter.MaxFieldLength(IndexWriter.DEFAULT_MAX_FIELD_LENGTH));
+                indexWriter.SetMergeScheduler(new ConcurrentMergeScheduler());
+                indexWriter.SetMaxBufferedDocs(1000);
+
+                for (int iDoc = 0; iDoc < 1000 * 10; iDoc++)
+                {
+                    Document doc = new Document();
+                    doc.Add(new Field("id", DateTime.Now.ToFileTimeUtc().ToString(), Field.Store.YES,
+                        Field.Index.ANALYZED, Field.TermVector.NO));
+                    doc.Add(new Field("Title", "dog " + " microsoft rules", Field.Store.NO, Field.Index.ANALYZED,
+                        Field.TermVector.NO));
+                    doc.Add(new Field("Body", "dog " + " microsoft rules", Field.Store.NO, Field.Index.ANALYZED,
+                        Field.TermVector.NO));
+                    indexWriter.AddDocument(doc);
+                }
+                indexWriter.Flush(true, true, true);
+                indexWriter.Optimize(true);
+                indexWriter.Dispose(true);
+
+                var searcher = new IndexSearcher(directory);
+                Console.WriteLine("Number of docs: {0}", searcher.IndexReader.NumDocs());
+                SearchForPhrase(searcher, "microsoft", 999);
+                searcher.Dispose();
+            }
+        }
+
+        [TestMethod]
         public void Demo_Usage_Test()
         {
             var directory = new SqlServerDirectory(Connection, new Options());
@@ -59,19 +91,13 @@ namespace LuceneNetSqlDirectory.Tests
 
                 Console.Write("Flushing and disposing writer...");
                 indexWriter.Flush(true, true, true);
+                //indexWriter.Optimize();
                 indexWriter.Commit();
                 indexWriter.Dispose();
             }
 
-            IndexSearcher searcher;
-
-            using (new AutoStopWatch("Creating searcher"))
-            {
-                searcher = new IndexSearcher(directory);
-            }
-            using (new AutoStopWatch("Count"))
-                Console.WriteLine("Number of docs: {0}", searcher.IndexReader.NumDocs());
-
+            var searcher = new IndexSearcher(directory);
+            Console.WriteLine("Number of docs: {0}", searcher.IndexReader.NumDocs());
             SearchForPhrase(searcher, "microsoft", 2);
         }
 
