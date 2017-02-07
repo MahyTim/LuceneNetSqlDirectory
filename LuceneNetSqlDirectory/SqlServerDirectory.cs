@@ -163,5 +163,11 @@ namespace LuceneNetSqlDirectory
             _runningOutputs.Values.ForEach(z => z.Dispose());
             _connection.Dispose();
         }
+
+        public void DeleteTemporaryFiles()
+        {
+            _connection.Execute($"DELETE FROM {_options.SchemaName}.FileContents WHERE IsDeleted = 1");
+            _connection.Execute($"DELETE FROM {_options.SchemaName}.FileMetaData WHERE IsDeleted = 1");
+        }
     }
 }

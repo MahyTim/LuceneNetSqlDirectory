@@ -20,7 +20,7 @@ namespace LuceneNetSqlDirectory.Tests
             for (int i = 0; i < 3; i++)
             {
                 var directory = new SqlServerDirectory(Connection, new Options());
-                var indexWriter = new IndexWriter(directory, new StandardAnalyzer(Lucene.Net.Util.Version.LUCENE_30), !IndexReader.IndexExists(directory), new Lucene.Net.Index.IndexWriter.MaxFieldLength(IndexWriter.DEFAULT_MAX_FIELD_LENGTH));
+                var indexWriter = new SqlServerIndexWriter(directory, new StandardAnalyzer(Lucene.Net.Util.Version.LUCENE_30), !IndexReader.IndexExists(directory), new Lucene.Net.Index.IndexWriter.MaxFieldLength(IndexWriter.DEFAULT_MAX_FIELD_LENGTH));
                 indexWriter.SetMergeScheduler(new ConcurrentMergeScheduler());
                 indexWriter.SetMaxBufferedDocs(1000);
 
@@ -58,7 +58,7 @@ namespace LuceneNetSqlDirectory.Tests
                 {
                     try
                     {
-                        indexWriter = new IndexWriter(directory, new StandardAnalyzer(Lucene.Net.Util.Version.LUCENE_30),
+                        indexWriter = new SqlServerIndexWriter(directory, new StandardAnalyzer(Lucene.Net.Util.Version.LUCENE_30),
                             !IndexReader.IndexExists(directory),
                             new Lucene.Net.Index.IndexWriter.MaxFieldLength(IndexWriter.DEFAULT_MAX_FIELD_LENGTH));
                     }
@@ -73,9 +73,9 @@ namespace LuceneNetSqlDirectory.Tests
                 indexWriter.SetRAMBufferSizeMB(100.0);
                 //indexWriter.SetInfoStream(new StreamWriter(Console.OpenStandardOutput()));
                 indexWriter.SetMergeScheduler(new SerialMergeScheduler());
-                indexWriter.SetMaxBufferedDocs(500);
+                indexWriter.SetMaxBufferedDocs(2000);
 
-                for (int iDoc = 0; iDoc < 1000; iDoc++)
+                for (int iDoc = 0; iDoc < 1000 * 10; iDoc++)
                 {
                     Document doc = new Document();
                     doc.Add(new Field("id", DateTime.Now.ToFileTimeUtc().ToString(), Field.Store.YES,

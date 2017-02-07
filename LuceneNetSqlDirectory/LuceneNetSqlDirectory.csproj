@@ -71,6 +71,7 @@
     <Compile Include="SqlServerDirectory.cs" />
     <Compile Include="SqlServerIndexInput.cs" />
     <Compile Include="SqlServerIndexOutput.cs" />
+    <Compile Include="SqlServerIndexWriter.cs" />
     <Compile Include="SqlServerLock.cs" />
     <Compile Include="SqlServerLockFactory.cs" />
   </ItemGroup>
