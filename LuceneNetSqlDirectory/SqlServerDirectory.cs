@@ -131,7 +131,7 @@ namespace LuceneNetSqlDirectory
 
             if (0 == _connection.ExecuteScalar<int>($"SELECT COUNT(0) FROM {_options.SchemaName}.FileContents WHERE Name = @name", new { name }))
             {
-                _connection.Execute($"INSERT INTO {_options.SchemaName}.FileContents (Name,Content) VALUES (@name,null)", new { name });
+                _connection.Execute($"INSERT INTO {_options.SchemaName}.FileContents (Name,Content) VALUES (@name,@content)", new { name, content = new byte[0] });
             }
             if (0 == _connection.ExecuteScalar<int>($"SELECT COUNT(0) FROM {_options.SchemaName}.FileMetaData WHERE Name = @name", new { name }))
             {

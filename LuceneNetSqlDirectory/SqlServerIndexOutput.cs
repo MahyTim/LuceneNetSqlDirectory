@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using System.Data.SqlClient;
 using Dapper;
 using Lucene.Net.Store;
@@ -6,59 +7,48 @@ using LuceneNetSqlDirectory.Helpers;
 
 namespace LuceneNetSqlDirectory
 {
-    class SqlServerIndexOutput : IndexOutput
+    class SqlServerIndexOutput : BufferedIndexOutput
     {
         private readonly SqlConnection _connection;
         private readonly string _name;
         private readonly Options _options;
-        private long _pointer;
-        private SqlServerStreamingWriter _writer;
-
+        private SqlCommand _updateCommand;
+        private SqlParameter _parameterName;
+        private SqlParameter _parameterData;
+        private SqlParameter _parameterIndex;
+        private SqlParameter _parameterLen;
         public SqlServerIndexOutput(SqlConnection connection, string name, Options options)
         {
             _connection = connection;
             _name = name;
             _options = options;
-            _writer = new SqlServerStreamingWriter(connection, options.SchemaName, name);
         }
 
-        public override void WriteByte(byte b)
+        public override void FlushBuffer(byte[] b, int offset, int len)
         {
-            WriteBytes(new[] { b }, 0, 1);
-        }
+            var segment = new byte[len];
+            Buffer.BlockCopy(b, offset, segment, 0, len);
 
-        public override void WriteBytes(byte[] b, int offset, int length)
-        {
-            var segment = new byte[length];
-            Buffer.BlockCopy(b, offset, segment, 0, length);
-            _writer.Add(_pointer, segment);
-            _pointer += length;
-        }
+            _updateCommand = _updateCommand ?? new SqlCommand($"UPDATE {_options.SchemaName}.[FileContents] SET [Content].WRITE(@chunk, @index, @len) WHERE [Name] = @name", _connection);
+            _parameterName = _parameterName ?? _updateCommand.Parameters.Add("@name", SqlDbType.NVarChar);
+            _parameterData = _parameterData ?? _updateCommand.Parameters.Add("@chunk", SqlDbType.VarBinary, -1);
+            _parameterIndex = _parameterIndex ?? _updateCommand.Parameters.Add("index", SqlDbType.BigInt);
+            _parameterLen = _parameterLen ?? _updateCommand.Parameters.Add("len", SqlDbType.BigInt);
 
-        public override void Flush()
-        {
-            _writer.Write(() => Length);
+            _parameterName.Value = _name;
+            _parameterData.Value = segment;
+            _parameterIndex.Value = FilePointer - len;
+            _parameterLen.Value = len;
+
+            _updateCommand.ExecuteNonQuery();
         }
 
         protected override void Dispose(bool disposing)
         {
-            Flush();
-            if (disposing)
-            {
-                if (_writer != null)
-                {
-                    _writer.Dispose();
-                    _writer = new SqlServerStreamingWriter(_connection, _options.SchemaName, _name);
-                }
-            }
+            base.Dispose(disposing);
+            _updateCommand?.Dispose();
+            _updateCommand = null;
         }
-
-        public override void Seek(long pos)
-        {
-            _pointer = pos;
-        }
-
-        public override long FilePointer => _pointer;
 
         public override long Length => _connection.ExecuteScalar<long>($"SELECT DATALENGTH(Content) FROM {_options.SchemaName}.FileContents WHERE name = @name", new { name = _name });
     }
