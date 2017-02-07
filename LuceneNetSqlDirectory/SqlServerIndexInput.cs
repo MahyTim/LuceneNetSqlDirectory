@@ -6,7 +6,7 @@ using LuceneNetSqlDirectory.Helpers;
 
 namespace LuceneNetSqlDirectory
 {
-    internal class SqlServerIndexInput : IndexInput
+    internal class SqlServerIndexInput : BufferedIndexInput
     {
         private readonly SqlConnection _connection;
         private readonly string _name;
@@ -23,14 +23,15 @@ namespace LuceneNetSqlDirectory
             _options = options;
         }
 
-        public override byte ReadByte()
+        protected override void Dispose(bool disposing)
         {
-            var buffer = new byte[1];
-            ReadBytes(buffer, 0, 1);
-            return buffer[0];
+            _reader?.Dispose();
+            _command?.Dispose();
+            _reader = null;
+            _command = null;
         }
 
-        public override void ReadBytes(byte[] b, int offset, int len)
+        public override void ReadInternal(byte[] b, int offset, int length)
         {
             if (b.Length == 0)
                 return;
@@ -50,20 +51,12 @@ namespace LuceneNetSqlDirectory
             }
             if (false == _reader.IsDBNull(0))
             {
-                _reader.GetBytes(0, _position, b, offset, len);
+                _reader.GetBytes(0, _position, b, offset, length);
             }
-            _position += len;
+            _position += length;
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            _reader?.Dispose();
-            _command?.Dispose();
-            _reader = null;
-            _command = null;
-        }
-
-        public override void Seek(long pos)
+        public override void SeekInternal(long pos)
         {
             _position = pos;
         }

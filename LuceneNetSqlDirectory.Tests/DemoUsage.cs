@@ -59,6 +59,7 @@ namespace LuceneNetSqlDirectory.Tests
 
                 Console.Write("Flushing and disposing writer...");
                 indexWriter.Flush(true, true, true);
+                //indexWriter.Optimize();
                 indexWriter.Commit();
                 indexWriter.Dispose();
             }
