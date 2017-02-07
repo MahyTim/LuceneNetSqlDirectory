@@ -19,7 +19,7 @@ namespace LuceneNetSqlDirectory.Tests
         {
             var directory = new SqlServerDirectory(Connection, new Options());
 
-            for (int outer = 0; outer < 2; outer++)
+            for (int outer = 0; outer < 10; outer++)
             {
                 IndexWriter indexWriter = null;
                 while (indexWriter == null)
