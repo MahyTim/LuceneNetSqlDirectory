@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Database.cs" />
+    <Compile Include="Helpers\AutoStopWatch.cs" />
     <Compile Include="Helpers\SqlHelper.cs" />
     <Compile Include="Helpers\SqlServerStreamingWriter.cs" />
     <Compile Include="Helpers\ByteHelper.cs" />

@@ -10,12 +10,12 @@ namespace LuceneNetSqlDirectory
         /// Locks are automatically released after a certain time window, by default this is 10 minutes. 
         /// If you need to do batch style jobs for adding/deleting/updating documents, increase this setting!
         /// </summary>
-        public int LockTimeoutInMinutes { get; set; }
+        public int LockTimeoutInSeconds { get; set; }
 
         public Options()
         {
-            SchemaName = "[dbo]";
-            LockTimeoutInMinutes = 10;
+            SchemaName = "[search]";
+            LockTimeoutInSeconds = 10 * 60;//10 minutes
         }
     }
 }

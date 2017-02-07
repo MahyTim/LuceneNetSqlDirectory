@@ -1,0 +1,1 @@
+﻿These tests are taken over from the Lucene project verify some specific situations.

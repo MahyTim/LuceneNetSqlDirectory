@@ -24,7 +24,7 @@ namespace LuceneNetSqlDirectory
                 return false;
             try
             {
-                _connection.Execute($"INSERT INTO {_options.SchemaName}.Locks (Name,LockReleaseTimestamp) VALUES (@name,DATEADD(MINUTE, @minutesToAdd, SYSUTCDATETIME()))", new { name = _lockName, minutesToAdd = _options.LockTimeoutInMinutes });
+                _connection.Execute($"INSERT INTO {_options.SchemaName}.Locks (Name,LockReleaseTimestamp) VALUES (@name,DATEADD(SECOND, @minutesToAdd, SYSUTCDATETIME()))", new { name = _lockName, minutesToAdd = _options.LockTimeoutInSeconds });
             }
             catch (SqlException ex) when (ex.Number == 2627) // Duplicate key --> duplicate lock
             {
