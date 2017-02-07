@@ -19,7 +19,7 @@ namespace LuceneNetSqlDirectory.Tests
         {
             var directory = new SqlServerDirectory(Connection, new Options());
 
-            for (int outer = 0; outer < 3; outer++)
+            for (int outer = 0; outer < 2; outer++)
             {
                 IndexWriter indexWriter = null;
                 while (indexWriter == null)
@@ -40,8 +40,6 @@ namespace LuceneNetSqlDirectory.Tests
                 Console.WriteLine("IndexWriter lock obtained, this process has exclusive write access to index");
                 indexWriter.SetRAMBufferSizeMB(100.0);
                 //indexWriter.SetInfoStream(new StreamWriter(Console.OpenStandardOutput()));
-                var mergePolicy = new LogDocMergePolicy(indexWriter) { MinMergeDocs = 10000 };
-                indexWriter.SetMergePolicy(mergePolicy);
                 indexWriter.SetMergeScheduler(new SerialMergeScheduler());
                 indexWriter.SetMaxBufferedDocs(500);
 
@@ -62,7 +60,6 @@ namespace LuceneNetSqlDirectory.Tests
                 Console.Write("Flushing and disposing writer...");
                 indexWriter.Flush(true, true, true);
                 indexWriter.Commit();
-                //indexWriter.Optimize();
                 indexWriter.Dispose();
             }
 
@@ -75,16 +72,10 @@ namespace LuceneNetSqlDirectory.Tests
             using (new AutoStopWatch("Count"))
                 Console.WriteLine("Number of docs: {0}", searcher.IndexReader.NumDocs());
 
-            while (true)
-            {
-                SearchForPhrase(searcher, "microsoft");
-                Thread.Sleep(1000);
-                //Console.WriteLine("Press a key to search again");
-                //Console.ReadKey();
-            }
+            SearchForPhrase(searcher, "microsoft", 2);
         }
 
-        static void SearchForPhrase(IndexSearcher searcher, string phrase)
+        static void SearchForPhrase(IndexSearcher searcher, string phrase, int minNumberOfHits)
         {
             using (new AutoStopWatch($"Search for {phrase}"))
             {
@@ -95,6 +86,7 @@ namespace LuceneNetSqlDirectory.Tests
 
                 hits = searcher.Search(query, 100);
                 Console.WriteLine("Found {0} results for {1}", hits.TotalHits, phrase);
+                Assert.IsTrue(hits.TotalHits > minNumberOfHits);
             }
         }
 
